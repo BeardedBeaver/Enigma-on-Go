@@ -17,7 +17,7 @@ func slicesEqual(first, second []string) bool {
 	return true
 }
 
-func TestGetPermutations(t *testing.T) {
+func TestGetPermutationsUnique(t *testing.T) {
 	input := []string{"A", "B", "C"}
 	actualOutput := [][]string{
 		{"A", "B", "C"},
@@ -28,7 +28,7 @@ func TestGetPermutations(t *testing.T) {
 		{"C", "B", "A"},
 	}
 
-	output := GetPermutations(input, 3)
+	output := GetPermutationsUnique(input, 3)
 	if len(actualOutput) != len(output) {
 		message := fmt.Sprintf("Permutation length mismatch, expected %d, got %d: "+
 			"expected %v\n"+

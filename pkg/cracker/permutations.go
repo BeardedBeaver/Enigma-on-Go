@@ -1,5 +1,7 @@
 package cracker
 
+// HasDuplicates function checks an input slice and returns true if it has at least one
+// non-unique element and false otherwise
 func HasDuplicates(slice []int) bool {
 	if len(slice) < 1 {
 		return false
@@ -14,7 +16,10 @@ func HasDuplicates(slice []int) bool {
 	return false
 }
 
-func GetPermutations(str []string, amount int) [][]string {
+// GetPermutationsUnique function returns all possible permutations of elements in a given list
+// so that each element is used only once in each permutation. A number of elements to be used
+// in permutations is passed in amount parameter.
+func GetPermutationsUnique(str []string, amount int) [][]string {
 	var result = make([][]string, 0)
 	length := len(str)
 
