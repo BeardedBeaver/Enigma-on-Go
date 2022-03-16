@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"sync"
 )
 
 // printResult function sorts an input map by value and outputs top-10 scores
@@ -76,18 +77,26 @@ func decode() {
 
 	rotorConfigs := cracker.GetPermutationsUnique([]string{"I", "II", "III", "IV", "V", "VI", "VII", "VIII"}, 3)
 	scores := make(map[string]float64)
+	wg := sync.WaitGroup{}
+	m := sync.Mutex{}
 	for _, rotorConfig := range rotorConfigs {
-		result, err := decodeRotorConfig(rotorConfig, message)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		for k, v := range result {
-			scores[k] = v
-		}
-		fmt.Println(rotorConfig)
+		wg.Add(1)
+		go func(config []string, message string) {
+			defer wg.Done()
+			result, err := decodeRotorConfig(config, message)
+			if err != nil {
+				fmt.Println(err) // panic?
+				return
+			}
+			m.Lock()
+			for k, v := range result {
+				scores[k] = v
+			}
+			fmt.Println(config)
+			m.Unlock()
+		}(rotorConfig, message)
 	}
-
+	wg.Wait()
 	printResult(scores)
 }
 
