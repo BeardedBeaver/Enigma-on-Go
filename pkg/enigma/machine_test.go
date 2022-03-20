@@ -5,12 +5,12 @@ import (
 )
 
 func TestBasicMachine(t *testing.T) {
-	machine, err := NewMachine(
-		[]string{"I", "II", "III"},
-		[]int{'A', 'A', 'A'},
-		[]int{0, 0, 0},
-		"B",
-		[]string{})
+	config := []RotorConfig{
+		{"I", 'A', 0},
+		{"II", 'A', 0},
+		{"III", 'A', 0},
+	}
+	machine, err := NewMachine(config, "B", []string{})
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}
@@ -22,12 +22,12 @@ func TestBasicMachine(t *testing.T) {
 }
 
 func TestLongerStringMachine(t *testing.T) {
-	machine, err := NewMachine(
-		[]string{"I", "II", "III"},
-		[]int{'A', 'A', 'A'},
-		[]int{0, 0, 0},
-		"B",
-		[]string{})
+	config := []RotorConfig{
+		{"I", 'A', 0},
+		{"II", 'A', 0},
+		{"III", 'A', 0},
+	}
+	machine, err := NewMachine(config, "B", []string{})
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}
@@ -46,12 +46,12 @@ func TestLongerStringMachine(t *testing.T) {
 }
 
 func TestRingOffset(t *testing.T) {
-	machine, err := NewMachine(
-		[]string{"II", "V", "VIII"},
-		[]int{'S', 'B', 'Z'},
-		[]int{4, 3, 2},
-		"B",
-		[]string{})
+	config := []RotorConfig{
+		{"II", 'S', 4},
+		{"V", 'B', 3},
+		{"VIII", 'Z', 2},
+	}
+	machine, err := NewMachine(config, "B", []string{})
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}
@@ -63,12 +63,12 @@ func TestRingOffset(t *testing.T) {
 }
 
 func TestMachine_PassString_AllStuff(t *testing.T) {
-	machine, err := NewMachine(
-		[]string{"I", "V", "VIII"},
-		[]int{'D', 'P', 'G'},
-		[]int{25, 1, 9},
-		"C",
-		[]string{"DG", "TH", "PO", "YU"})
+	config := []RotorConfig{
+		{"I", 'D', 25},
+		{"V", 'P', 1},
+		{"VIII", 'G', 9},
+	}
+	machine, err := NewMachine(config, "C", []string{"DG", "TH", "PO", "YU"})
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}

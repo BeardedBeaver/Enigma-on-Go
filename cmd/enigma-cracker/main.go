@@ -12,7 +12,7 @@ import (
 )
 
 // printResult function sorts an input map by value and outputs top-10 scores
-func printResult(scores map[string]float64) {
+func printResult(scores map[string]float64, top int) {
 	type KeyValuePair struct {
 		Key   string
 		Value float64
@@ -28,34 +28,34 @@ func printResult(scores map[string]float64) {
 	})
 
 	for index, kv := range pairs {
-		if index > 10 {
+		if index > top {
 			break
 		}
 		fmt.Printf("%s, %f\n", kv.Key, kv.Value)
 	}
 }
 
-func decodeRotorConfig(config []string, message string) (map[string]float64, error) {
+func decodeRotorConfig(rotorModels []string, message string) (map[string]float64, error) {
 	scores := make(map[string]float64)
-	if len(config) != 3 {
+	if len(rotorModels) != 3 {
 		return scores, errors.New("not found")
 	}
 	for r1 := 0; r1 < 26; r1++ {
 		for r2 := 0; r2 < 26; r2++ {
 			for r3 := 0; r3 < 26; r3++ {
-				machine, err := enigma.NewMachine(
-					config,
-					[]int{'A' + r1, 'A' + r2, 'A' + r3},
-					[]int{0, 0, 0},
-					"B",
-					[]string{})
+				config := []enigma.RotorConfig{
+					{rotorModels[0], 'A' + r1, 0},
+					{rotorModels[1], 'A' + r2, 0},
+					{rotorModels[2], 'A' + r3, 0},
+				}
+				machine, err := enigma.NewMachine(config, "B", []string{})
 				if err != nil {
 					return scores, fmt.Errorf("decode rotor config error: %v", err)
 				}
 				decoded := machine.PassString(message)
 				ioc := cracker.IOC(decoded)
 				key := fmt.Sprintf("%s %s %s (%c, %c, %c)",
-					config[0], config[1], config[2],
+					rotorModels[0], rotorModels[1], rotorModels[2],
 					r1+'A', r2+'A', r3+'A')
 				scores[key] = ioc
 			}
@@ -65,14 +65,8 @@ func decodeRotorConfig(config []string, message string) (map[string]float64, err
 }
 
 // tries to guess the Enigma configuration and decode passed text
-func decode() {
-	fmt.Println("Enter a message:")
-	in := bufio.NewReader(os.Stdin)
-	message, err := in.ReadString('\n')
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+func decode(message string) {
+
 	message = enigma.PreprocessText(message)
 
 	rotorConfigs := cracker.GetPermutationsUnique([]string{"I", "II", "III", "IV", "V", "VI", "VII", "VIII"}, 3)
@@ -97,7 +91,7 @@ func decode() {
 		}(rotorConfig, message)
 	}
 	wg.Wait()
-	printResult(scores)
+	printResult(scores, 10)
 }
 
 // Go is a statically typed, compiled programming language designed at Google by Robert Griesemer, Rob Pike, and Ken Thompson.
@@ -107,5 +101,12 @@ func decode() {
 
 // fwjin qmteg xvvpw frdat rbaus kgufw yicto cppif lgjqo iuskb cqzoj nwoxk xwgkw mlvwm nijqi bojma liixl bveax zxvmf fdewr hcrvw wruhj zlzfp fqius ojmzv cxrrg hdhyt chuqi tgfcs nieit jpoph kegfj szppy nnenm bjsgc podwv upmyc quigk psbki sjszb dn
 func main() {
-	decode()
+	fmt.Println("Enter a message:")
+	in := bufio.NewReader(os.Stdin)
+	message, err := in.ReadString('\n')
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	decode(message)
 }

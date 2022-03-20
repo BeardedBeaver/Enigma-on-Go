@@ -1,7 +1,6 @@
 package enigma
 
 import (
-	"errors"
 	"strings"
 	"unicode"
 )
@@ -93,18 +92,21 @@ func (machine *Machine) PassString(message string) string {
 	return result
 }
 
+type RotorConfig struct {
+	Model    string
+	Position int
+	Offset   int
+}
+
 // NewMachine creates a new Enigma machine.
 // Rotor models are listed from right to left
-func NewMachine(rotorModels []string,
-	rotorPositions, rotorOffsets []int,
+func NewMachine(rotorConfig []RotorConfig,
 	reflectorModel string,
 	plugboardMappings []string) (Machine, error) {
 	var machine Machine
-	if (len(rotorModels) == len(rotorPositions) && len(rotorModels) == len(rotorOffsets)) == false {
-		return Machine{}, errors.New("rotor models, positions and offsets length have to be the same")
-	}
-	for i, model := range rotorModels {
-		rotor, err := NewRotor(model, rotorPositions[i], rotorOffsets[i])
+
+	for _, config := range rotorConfig {
+		rotor, err := NewRotor(config.Model, config.Position, config.Offset)
 		if err != nil {
 			return Machine{}, err
 		}
