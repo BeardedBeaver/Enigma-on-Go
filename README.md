@@ -18,9 +18,9 @@ Here's a possible list of things that I'm going to do in this project:
    - [x] Encryption and decryption of a plain text from standard input
    - [ ] Encryption and decryption of a text from a text file
  - [ ] Command-line app for cracking an enigma-encrypted message with an unknown machine config
-   - [ ] Bruteforce rotor configuration
+   - [x] Bruteforce rotor configuration
    - [x] Index Of Coincidence metric to evaluate a bruteforce result
-   - [ ] Mess around with channels and goroutines to speed up a bruteforce
+   - [x] Mess around with channels and goroutines to speed up a bruteforce
  - [ ] GitHub Actions for testing
 
 ---

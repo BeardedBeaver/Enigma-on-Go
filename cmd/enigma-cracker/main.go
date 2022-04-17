@@ -67,18 +67,7 @@ func decodeRotorConfig(rotorModels []string, message string) (map[string]float64
 // tries to guess the Enigma configuration and decode passed text
 func decode(message string) {
 	message = enigma.PreprocessText(message)
-	rotorModels := []string{ // TODO this should probably live in enigma package
-		"I",
-		"II",
-		"III",
-		"IV",
-		"V",
-		"VI",
-		"VII",
-		"VIII",
-	}
-
-	scores := make(map[string]float64)
+	rotorModels := enigma.AvailableRotorModels()
 
 	permutationSender := make(chan []int)
 	scoreSender := make(chan map[string]float64)
@@ -109,6 +98,7 @@ func decode(message string) {
 		close(scoreSender)
 	}()
 
+	scores := make(map[string]float64)
 	for score := range scoreSender {
 		for k, v := range score {
 			scores[k] = v

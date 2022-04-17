@@ -27,6 +27,19 @@ var rotorNotchPositions = map[string][]string{
 	"VIII": {"Z", "M"},
 }
 
+func AvailableRotorModels() []string {
+	return []string{
+		"I",
+		"II",
+		"III",
+		"IV",
+		"V",
+		"VI",
+		"VII",
+		"VIII",
+	}
+}
+
 type Rotor struct {
 	mapping        string
 	backMapping    string
