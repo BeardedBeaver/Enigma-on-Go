@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-// printResult function sorts an input map by value and outputs top-10 scores
+// printResult function sorts an input map by value and outputs top scores
 func printResult(scores map[string]float64, top int) {
 	type KeyValuePair struct {
 		Key   string
@@ -66,14 +66,31 @@ func decodeRotorConfig(rotorModels []string, message string) (map[string]float64
 
 // tries to guess the Enigma configuration and decode passed text
 func decode(message string) {
-
 	message = enigma.PreprocessText(message)
+	rotorModels := []string{ // TODO this should probably live in enigma package
+		"I",
+		"II",
+		"III",
+		"IV",
+		"V",
+		"VI",
+		"VII",
+		"VIII",
+	}
 
-	rotorConfigs := cracker.GetPermutationsUnique([]string{"I", "II", "III", "IV", "V", "VI", "VII", "VIII"}, 3)
 	scores := make(map[string]float64)
+
+	permutationSender := make(chan []int)
+	scoreSender := make(chan map[string]float64)
+
+	go cracker.GeneratePermutations(8, 3, permutationSender)
+
 	wg := sync.WaitGroup{}
-	m := sync.Mutex{}
-	for _, rotorConfig := range rotorConfigs {
+	for permutation := range permutationSender {
+		rotorConfig := make([]string, 0, 3)
+		for _, index := range permutation {
+			rotorConfig = append(rotorConfig, rotorModels[index])
+		}
 		wg.Add(1)
 		go func(config []string, message string) {
 			defer wg.Done()
@@ -82,15 +99,22 @@ func decode(message string) {
 				fmt.Println(err) // panic?
 				return
 			}
-			m.Lock()
-			for k, v := range result {
-				scores[k] = v
-			}
 			fmt.Println(config)
-			m.Unlock()
+			scoreSender <- result
 		}(rotorConfig, message)
 	}
-	wg.Wait()
+
+	go func() {
+		wg.Wait()
+		close(scoreSender)
+	}()
+
+	for score := range scoreSender {
+		for k, v := range score {
+			scores[k] = v
+		}
+	}
+
 	printResult(scores, 10)
 }
 
