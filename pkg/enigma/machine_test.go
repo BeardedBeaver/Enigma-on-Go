@@ -5,12 +5,17 @@ import (
 )
 
 func TestBasicMachine(t *testing.T) {
-	config := []RotorConfig{
+	rotorConfig := []RotorConfig{
 		{"I", 'A', 0},
 		{"II", 'A', 0},
 		{"III", 'A', 0},
 	}
-	machine, err := NewMachine(config, "B", []string{})
+	machineConfig := MachineConfig{
+		rotorConfig,
+		"B",
+		[]string{},
+	}
+	machine, err := NewMachine(machineConfig)
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}
@@ -22,12 +27,17 @@ func TestBasicMachine(t *testing.T) {
 }
 
 func TestLongerStringMachine(t *testing.T) {
-	config := []RotorConfig{
+	rotorConfig := []RotorConfig{
 		{"I", 'A', 0},
 		{"II", 'A', 0},
 		{"III", 'A', 0},
 	}
-	machine, err := NewMachine(config, "B", []string{})
+	machineConfig := MachineConfig{
+		rotorConfig,
+		"B",
+		[]string{},
+	}
+	machine, err := NewMachine(machineConfig)
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}
@@ -46,12 +56,17 @@ func TestLongerStringMachine(t *testing.T) {
 }
 
 func TestRingOffset(t *testing.T) {
-	config := []RotorConfig{
+	rotorConfig := []RotorConfig{
 		{"II", 'S', 4},
 		{"V", 'B', 3},
 		{"VIII", 'Z', 2},
 	}
-	machine, err := NewMachine(config, "B", []string{})
+	machineConfig := MachineConfig{
+		rotorConfig,
+		"B",
+		[]string{},
+	}
+	machine, err := NewMachine(machineConfig)
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}
@@ -63,16 +78,45 @@ func TestRingOffset(t *testing.T) {
 }
 
 func TestMachine_PassString_AllStuff(t *testing.T) {
-	config := []RotorConfig{
+	rotorConfig := []RotorConfig{
 		{"I", 'D', 25},
 		{"V", 'P', 1},
 		{"VIII", 'G', 9},
 	}
-	machine, err := NewMachine(config, "C", []string{"DG", "TH", "PO", "YU"})
+	machineConfig := MachineConfig{
+		rotorConfig,
+		"C",
+		[]string{"DG", "TH", "PO", "YU"},
+	}
+	machine, err := NewMachine(machineConfig)
 	if err != nil {
 		t.Error("Can't create Machine: ", err)
 	}
 
+	message := "OHWOWMYENIGMAWORKSEVENWITHAPLUGBOARDANDSTUFFHOWCOOLISTHAT"
+	output := machine.PassString(message)
+	expected := "VNBWAIQVVFZIGEIGYPVWWREKYFLSEAAXBYVVSBXMKSXPRYPEGYKQCDAWL"
+	if output != expected {
+		t.Error("Error encrypting message - expected:\n", expected, "\ngot:\n", output)
+	}
+}
+
+func TestNewMachineFromJson(t *testing.T) {
+	config := []byte(`
+	{
+		"rotorConfig": [
+		{"model": "I", "position": 68, "offset": 25},
+		{"model": "V", "position": 80, "offset": 1},
+		{"model": "VIII", "position": 71, "offset": 9}
+		],
+		"reflectorModel": "C",
+		"plugboardMappings": ["DG", "TH", "PO", "YU"]
+	}
+	`)
+	machine, err := NewMachineFromJson(config)
+	if err != nil {
+		t.Error(err)
+	}
 	message := "OHWOWMYENIGMAWORKSEVENWITHAPLUGBOARDANDSTUFFHOWCOOLISTHAT"
 	output := machine.PassString(message)
 	expected := "VNBWAIQVVFZIGEIGYPVWWREKYFLSEAAXBYVVSBXMKSXPRYPEGYKQCDAWL"

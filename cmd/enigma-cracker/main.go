@@ -4,11 +4,13 @@ import (
 	"EnigmaGo/pkg/cracker"
 	"EnigmaGo/pkg/enigma"
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"sort"
 	"sync"
+	"time"
 )
 
 // printResult function sorts an input map by value and outputs top scores
@@ -43,21 +45,28 @@ func decodeRotorConfig(rotorModels []string, message string) (map[string]float64
 	for r1 := 0; r1 < 26; r1++ {
 		for r2 := 0; r2 < 26; r2++ {
 			for r3 := 0; r3 < 26; r3++ {
-				config := []enigma.RotorConfig{
+				rotorConfig := []enigma.RotorConfig{
 					{rotorModels[0], 'A' + r1, 0},
 					{rotorModels[1], 'A' + r2, 0},
 					{rotorModels[2], 'A' + r3, 0},
 				}
-				machine, err := enigma.NewMachine(config, "B", []string{})
+				machineConfig := enigma.MachineConfig{
+					RotorConfig:       rotorConfig,
+					ReflectorModel:    "B",
+					PlugboardMappings: []string{},
+				}
+
+				machine, err := enigma.NewMachine(machineConfig)
 				if err != nil {
 					return scores, fmt.Errorf("decode rotor config error: %v", err)
 				}
 				decoded := machine.PassString(message)
 				ioc := cracker.IOC(decoded)
-				key := fmt.Sprintf("%s %s %s (%c, %c, %c)",
-					rotorModels[0], rotorModels[1], rotorModels[2],
-					r1+'A', r2+'A', r3+'A')
-				scores[key] = ioc
+				key, err := json.Marshal(machineConfig)
+				if err != nil {
+					return scores, err
+				}
+				scores[string(key[:])] = ioc
 			}
 		}
 	}
@@ -66,6 +75,7 @@ func decodeRotorConfig(rotorModels []string, message string) (map[string]float64
 
 // tries to guess the Enigma configuration and decode passed text
 func decode(message string) {
+	start := time.Now()
 	message = enigma.PreprocessText(message)
 	rotorModels := enigma.AvailableRotorModels()
 
@@ -106,6 +116,7 @@ func decode(message string) {
 	}
 
 	printResult(scores, 10)
+	fmt.Printf("Elapsed time %s", time.Since(start))
 }
 
 // Go is a statically typed, compiled programming language designed at Google by Robert Griesemer, Rob Pike, and Ken Thompson.

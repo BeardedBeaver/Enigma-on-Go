@@ -36,12 +36,17 @@ func encode() {
 	}
 
 	fmt.Printf("%s/%s/%s\n", rotor1, rotor2, rotor3)
-	config := []enigma.RotorConfig{
+	rotorConfig := []enigma.RotorConfig{
 		{rotor1, int(offset1), 0},
 		{rotor2, int(offset2), 0},
 		{rotor3, int(offset3), 0},
 	}
-	machine, err := enigma.NewMachine(config, "B", []string{})
+	machineConfig := enigma.MachineConfig{
+		RotorConfig:       rotorConfig,
+		ReflectorModel:    "B",
+		PlugboardMappings: []string{},
+	}
+	machine, err := enigma.NewMachine(machineConfig)
 	if err != nil {
 		fmt.Println(err)
 		return

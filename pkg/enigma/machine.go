@@ -1,6 +1,7 @@
 package enigma
 
 import (
+	"encoding/json"
 	"strings"
 	"unicode"
 )
@@ -22,10 +23,23 @@ func PreprocessText(message string) string {
 	return b.String()
 }
 
+type RotorConfig struct {
+	Model    string `json:"model"`
+	Position int    `json:"position"`
+	Offset   int    `json:"offset"`
+}
+
+type MachineConfig struct {
+	RotorConfig       []RotorConfig `json:"rotorConfig"`
+	ReflectorModel    string        `json:"reflectorModel"`
+	PlugboardMappings []string      `json:"plugboardMappings,omitempty"`
+}
+
 type Machine struct {
 	refl    Reflector
 	rot     []Rotor
 	plugbrd Plugboard
+	conf    MachineConfig
 }
 
 func (machine *Machine) passChar(character byte) byte {
@@ -92,36 +106,37 @@ func (machine *Machine) PassString(message string) string {
 	return result
 }
 
-type RotorConfig struct {
-	Model    string
-	Position int
-	Offset   int
-}
-
 // NewMachine creates a new Enigma machine.
 // Rotor models are listed from right to left
-func NewMachine(rotorConfig []RotorConfig,
-	reflectorModel string,
-	plugboardMappings []string) (Machine, error) {
+func NewMachine(conf MachineConfig) (Machine, error) {
 	var machine Machine
-
-	for _, config := range rotorConfig {
+	machine.conf = conf
+	for _, config := range conf.RotorConfig {
 		rotor, err := NewRotor(config.Model, config.Position, config.Offset)
 		if err != nil {
 			return Machine{}, err
 		}
 		machine.rot = append(machine.rot, rotor)
 	}
-	refl, err := NewReflector(reflectorModel)
+	refl, err := NewReflector(conf.ReflectorModel)
 	if err != nil {
 		return Machine{}, err
 	}
 	machine.refl = refl
 
-	plugbrd, err := NewPlugboard(plugboardMappings)
+	plugbrd, err := NewPlugboard(conf.PlugboardMappings)
 	if err != nil {
 		return Machine{}, err
 	}
 	machine.plugbrd = plugbrd
 	return machine, nil
+}
+
+func NewMachineFromJson(j []byte) (Machine, error) {
+	conf := MachineConfig{}
+	err := json.Unmarshal(j, &conf)
+	if err != nil {
+		return Machine{}, err
+	}
+	return NewMachine(conf)
 }
