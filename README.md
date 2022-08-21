@@ -13,8 +13,8 @@ Here's a possible list of things that I'm going to do in this project:
    - [x] Reflector model with all main reflectors implemented
    - [x] Plugboard
  - [ ] Command-line app for encrypting and decrypting messages
-   - [ ] Configuration from arguments
-   - [ ] Configuration from standard input
+   - [x] Configuration from arguments
+   - [x] Configuration from standard input
    - [x] Encryption and decryption of a plain text from standard input
    - [ ] Encryption and decryption of a text from a text file
  - [ ] Command-line app for cracking an enigma-encrypted message with an unknown machine config
