@@ -13,6 +13,16 @@ var reflectorMappings = map[string]string{
 	"C thin": "RDOBJNTKVEHMLFCWZAXGYIPSUQ",
 }
 
+func AvailableReflectorModels() []string {
+	return []string{
+		"A",
+		"B",
+		"C",
+		"B thin",
+		"C thin",
+	}
+}
+
 type Reflector struct {
 	mapping string
 }
