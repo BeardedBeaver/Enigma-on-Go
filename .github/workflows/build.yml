@@ -1,0 +1,20 @@
+name: Build
+on: [push, pull_request]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        go: [1.19]
+
+    steps:
+      - name: Set up Go
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+
+      - run: go test ./pkg/enigma ./pkg/cracker
