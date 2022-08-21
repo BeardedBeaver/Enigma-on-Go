@@ -2,6 +2,9 @@ package enigma
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -139,4 +142,47 @@ func NewMachineFromJson(j []byte) (Machine, error) {
 		return Machine{}, err
 	}
 	return NewMachine(conf)
+}
+
+func NewMachineFromTextConfig(
+	rotorModels, rotorPositions, rotorOffsets, reflectorModel string,
+	plugboardMapping []string,
+) (Machine, error) {
+	rotors := strings.Split(rotorModels, " ")
+	positions := strings.Split(rotorPositions, " ")
+	offsets := strings.Split(rotorOffsets, " ")
+
+	if len(positions) != len(rotors) {
+		return Machine{}, errors.New("number of rotor positions" +
+			"doesn't match number of rotors")
+	}
+
+	if len(offsets) != len(rotors) {
+		return Machine{}, errors.New("number of rotor offsets" +
+			"doesn't match number of rotors")
+	}
+
+	rotorConfig := make([]RotorConfig, 0, len(rotors))
+	for i := 0; i < len(rotors); i++ {
+		rotorSetting := int(positions[i][0])
+		rotorOffset, err := strconv.Atoi(offsets[i])
+		if err != nil {
+			fmt.Println(err)
+			return Machine{}, err
+		}
+		rotorConfig = append(
+			rotorConfig,
+			RotorConfig{Model: rotors[i], Position: rotorSetting, Offset: rotorOffset},
+		)
+	}
+	machineConfig := MachineConfig{
+		RotorConfig:       rotorConfig,
+		ReflectorModel:    reflectorModel,
+		PlugboardMappings: plugboardMapping,
+	}
+	machine, err := NewMachine(machineConfig)
+	if err != nil {
+		return Machine{}, err
+	}
+	return machine, nil
 }

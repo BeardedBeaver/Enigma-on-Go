@@ -3,9 +3,9 @@ package main
 import (
 	"EnigmaGo/pkg/enigma"
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -39,18 +39,12 @@ func encodeFromStdin() {
 		fmt.Println(err)
 		return
 	}
-	rotorModels := strings.Split(rotors, " ")
 
 	fmt.Println("Enter rotor positions (from right to left)")
 	fmt.Println("Example: A T H")
 	positions, err := readString(in)
 	if err != nil {
 		fmt.Println(err)
-		return
-	}
-	rotorPositions := strings.Split(positions, " ")
-	if len(rotorPositions) != len(rotorModels) {
-		fmt.Println("Number of rotor models should be the same as the number of rotor positions")
 		return
 	}
 
@@ -61,59 +55,59 @@ func encodeFromStdin() {
 		fmt.Println(err)
 		return
 	}
-	rotorOffsets := strings.Split(offsets, " ")
-	if len(rotorOffsets) != len(rotorModels) {
-		fmt.Println("Number of rotor offsets should be the same as the number of rotor models")
-		return
-	}
-
-	rotorConfig := make([]enigma.RotorConfig, 0, len(rotorModels))
-	for i := 0; i < len(rotorModels); i++ {
-		rotorSetting := int(rotorPositions[i][0])
-		rotorOffset, err := strconv.Atoi(rotorOffsets[i])
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		rotorConfig = append(
-			rotorConfig,
-			enigma.RotorConfig{Model: rotorModels[i], Position: rotorSetting, Offset: rotorOffset},
-		)
-	}
 
 	fmt.Println("Enter reflector model")
 	fmt.Println(enigma.AvailableReflectorModels())
-	reflectorModel, err := readString(in)
+	reflector, err := readString(in)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	encoded, err := encode(message, rotorConfig, reflectorModel, []string{})
+	machine, err := enigma.NewMachineFromTextConfig(
+		rotors,
+		positions,
+		offsets,
+		reflector,
+		[]string{})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(encoded)
+	fmt.Println(machine.PassString(message))
 }
 
-func encode(message string,
-	rotorConfig []enigma.RotorConfig,
-	reflectorModel string,
-	plugboardMapping []string) (string, error) {
-	machineConfig := enigma.MachineConfig{
-		RotorConfig:       rotorConfig,
-		ReflectorModel:    reflectorModel,
-		PlugboardMappings: plugboardMapping,
+func encodeFromArgs() {
+	var rotorModels string
+	var rotorPositions string
+	var rotorOffsets string
+	var reflector string
+	var message string
+	flag.StringVar(&rotorModels, "rotors", "", "list of rotor models right to left")
+	flag.StringVar(&rotorPositions, "positions", "A A A", "list of rotor positions right to left")
+	flag.StringVar(&rotorOffsets, "offsets", "0 0 0", "list of rotor offsets right to left 0-based")
+	flag.StringVar(&reflector, "reflector", "B", "reflector model")
+	flag.StringVar(&message, "message", "", "message to encode or decode")
+	flag.Parse()
+
+	if len(message) == 0 {
+		fmt.Println("Please provide a message to encrypt")
+		return
 	}
-	machine, err := enigma.NewMachine(machineConfig)
+	message = enigma.PreprocessText(message)
+	machine, err := enigma.NewMachineFromTextConfig(rotorModels, rotorPositions, rotorOffsets, reflector, []string{})
 	if err != nil {
-		return "", err
+		fmt.Println(err)
+		return
 	}
-	return machine.PassString(message), nil
+	fmt.Println(machine.PassString(message))
 }
 
 func main() {
-	encodeFromStdin()
+	if len(os.Args) == 1 {
+		encodeFromStdin()
+	} else {
+		encodeFromArgs()
+	}
 }
