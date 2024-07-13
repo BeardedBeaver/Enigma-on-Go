@@ -13,7 +13,7 @@ func TestReflectors(t *testing.T) {
 		if err != nil {
 			t.Error("Can't create Reflector model", model)
 		}
-		for i, _ := range input {
+		for i := range input {
 			result := reflector.Pass(input[i])
 			if result != mapping[i] {
 				message := fmt.Sprintf("Error on Reflector "+

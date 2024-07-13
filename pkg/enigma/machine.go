@@ -66,7 +66,7 @@ func (machine *Machine) passChar(character byte) byte {
 						break
 					}
 				}
-				if alreadyHasToSpin == false {
+				if !alreadyHasToSpin {
 					rotorsToSpin = append(rotorsToSpin, i)
 				}
 			}

@@ -109,8 +109,8 @@ func NewRotor(model string, position, offset int) (Rotor, error) {
 		return Rotor{}, errors.New("rotor offset should be a number between 0 and 25")
 	}
 	mapping, ok := rotorMappings[model]
-	if ok == false {
-		return Rotor{}, errors.New(fmt.Sprintf("Mapping not found for rotor model %s", model))
+	if !ok {
+		return Rotor{}, fmt.Errorf("mapping not found for rotor model %s", model)
 	}
 
 	// forms a back mapping for the back pass
@@ -125,8 +125,8 @@ func NewRotor(model string, position, offset int) (Rotor, error) {
 	}
 
 	notchPositions, ok := rotorNotchPositions[model]
-	if ok == false {
-		return Rotor{}, errors.New(fmt.Sprintf("Notch position not found for rotor model %s", model))
+	if !ok {
+		return Rotor{}, fmt.Errorf("notch position not found for rotor model %s", model)
 	}
 	rotor := Rotor{mapping, backMapping, position - 'A', offset, notchPositions}
 	return rotor, nil
