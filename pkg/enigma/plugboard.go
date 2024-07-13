@@ -10,7 +10,7 @@ type Plugboard struct {
 
 func (plugboard *Plugboard) PassCharacter(character byte) byte {
 	output, ok := plugboard.mappings[character]
-	if ok == false {
+	if !ok {
 		return character
 	}
 	return output
@@ -32,11 +32,11 @@ func NewPlugboard(mappings []string) (Plugboard, error) {
 			return Plugboard{}, fmt.Errorf("mapping %s contains invalid characters", mapping)
 		}
 		_, ok := plugboardMappings[input]
-		if ok == true {
+		if ok {
 			return Plugboard{}, fmt.Errorf("mapping %s already added to plugboard", mapping)
 		}
 		_, ok = plugboardMappings[output]
-		if ok == true {
+		if ok {
 			return Plugboard{}, fmt.Errorf("mapping %s already added to plugboard", mapping)
 		}
 		plugboardMappings[input] = output

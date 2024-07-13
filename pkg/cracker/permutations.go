@@ -6,7 +6,7 @@ func GeneratePermutations(n, length int, sender chan<- []int) {
 	defer close(sender)
 	generator := combin.NewPermutationGenerator(n, length)
 	for {
-		if generator.Next() == false {
+		if !generator.Next() {
 			break
 		}
 		perm := generator.Permutation(nil)
