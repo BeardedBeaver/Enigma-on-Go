@@ -16,15 +16,26 @@ var rotorMappings = map[string]string{
 	"VIII": "FKQHTLXOCBJSPDZRAMEWNIUYGV",
 }
 
-var rotorNotchPositions = map[string][]string{
-	"I":    {"Q"},
-	"II":   {"E"},
-	"III":  {"V"},
-	"IV":   {"J"},
-	"V":    {"Z"},
-	"VI":   {"Z", "M"},
-	"VII":  {"Z", "M"},
-	"VIII": {"Z", "M"},
+var rotorBackMappings = map[string]string{
+	"I":    "UWYGADFPVZBECKMTHXSLRINQOJ",
+	"II":   "AJPCZWRLFBDKOTYUQGENHXMIVS",
+	"III":  "TAGBPCSDQEUFVNZHYIXJWLRKOM",
+	"IV":   "HZWVARTNLGUPXQCEJMBSKDYOIF",
+	"V":    "QCYLXWENFTZOSMVJUDKGIARPHB",
+	"VI":   "SKXQLHCNWARVGMEBJPTYFDZUIO",
+	"VII":  "QMGYVPEDRCWTIANUXFKZOSLHJB",
+	"VIII": "QJINSAYDVKBFRUHMCPLEWZTGXO",
+}
+
+var rotorNotchPositions = map[string][]byte{
+	"I":    {'Q'},
+	"II":   {'E'},
+	"III":  {'V'},
+	"IV":   {'J'},
+	"V":    {'Z'},
+	"VI":   {'Z', 'M'},
+	"VII":  {'Z', 'M'},
+	"VIII": {'Z', 'M'},
 }
 
 func AvailableRotorModels() []string {
@@ -45,7 +56,7 @@ type Rotor struct {
 	backMapping    string
 	position       int
 	offset         int
-	notchPositions []string
+	notchPositions []byte
 }
 
 func (rotor *Rotor) passCharacter(mapping string, character byte) byte {
@@ -83,7 +94,7 @@ func (rotor *Rotor) Spin() {
 }
 
 func (rotor *Rotor) IsAtNotch() bool {
-	var currentPosition = fmt.Sprintf("%c", rotor.position+'A')
+	var currentPosition = byte(rotor.position + 'A')
 	for _, position := range rotor.notchPositions {
 		if position == currentPosition {
 			return true
@@ -113,15 +124,9 @@ func NewRotor(model string, position, offset int) (Rotor, error) {
 		return Rotor{}, fmt.Errorf("mapping not found for rotor model %s", model)
 	}
 
-	// forms a back mapping for the back pass
-	var backMapping string
-	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	for _, letter := range alphabet {
-		for j, letterInMapping := range mapping {
-			if letter == letterInMapping {
-				backMapping += string(alphabet[j])
-			}
-		}
+	backMapping, ok := rotorBackMappings[model]
+	if !ok {
+		return Rotor{}, fmt.Errorf("backwards mapping not found for rotor model %s", model)
 	}
 
 	notchPositions, ok := rotorNotchPositions[model]

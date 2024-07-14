@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime/pprof"
 	"sort"
 	"sync"
 	"time"
@@ -46,9 +47,9 @@ func decodeRotorConfig(rotorModels []string, message string) (map[string]float64
 		for r2 := 0; r2 < 26; r2++ {
 			for r3 := 0; r3 < 26; r3++ {
 				rotorConfig := []enigma.RotorConfig{
-					{rotorModels[0], 'A' + r1, 0},
-					{rotorModels[1], 'A' + r2, 0},
-					{rotorModels[2], 'A' + r3, 0},
+					{Model: rotorModels[0], Position: 'A' + r1, Offset: 0},
+					{Model: rotorModels[1], Position: 'A' + r2, Offset: 0},
+					{Model: rotorModels[2], Position: 'A' + r3, Offset: 0},
 				}
 				machineConfig := enigma.MachineConfig{
 					RotorConfig:       rotorConfig,
@@ -76,6 +77,14 @@ func decodeRotorConfig(rotorModels []string, message string) (map[string]float64
 // tries to guess the Enigma configuration and decode passed text
 func decode(message string) {
 	start := time.Now()
+
+	f, err := os.Create("profile.prof")
+	if err != nil {
+		panic(err)
+	}
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
 	message = enigma.PreprocessText(message)
 	rotorModels := enigma.AvailableRotorModels()
 
@@ -116,7 +125,7 @@ func decode(message string) {
 	}
 
 	printResult(scores, 10)
-	fmt.Printf("Elapsed time %s", time.Since(start))
+	fmt.Printf("Elapsed time %s\n", time.Since(start))
 }
 
 // Go is a statically typed, compiled programming language designed at Google by Robert Griesemer, Rob Pike, and Ken Thompson.
