@@ -78,12 +78,14 @@ func decodeRotorConfig(rotorModels []string, message string) (map[string]float64
 func decode(message string) {
 	start := time.Now()
 
-	f, err := os.Create("profile.prof")
-	if err != nil {
-		panic(err)
+	if fileName := os.Getenv("ENIGMA_GO_PROFILE_NAME"); fileName != "" {
+		f, err := os.Create(fileName)
+		if err != nil {
+			panic(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
-	pprof.StartCPUProfile(f)
-	defer pprof.StopCPUProfile()
 
 	message = enigma.PreprocessText(message)
 	rotorModels := enigma.AvailableRotorModels()
@@ -125,7 +127,7 @@ func decode(message string) {
 	}
 
 	printResult(scores, 10)
-	fmt.Printf("Elapsed time %s\n", time.Since(start))
+	fmt.Printf("Elapsed time %f seconds\n", time.Since(start).Seconds())
 }
 
 // Go is a statically typed, compiled programming language designed at Google by Robert Griesemer, Rob Pike, and Ken Thompson.
