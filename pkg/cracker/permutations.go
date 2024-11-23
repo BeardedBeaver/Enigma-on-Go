@@ -2,14 +2,14 @@ package cracker
 
 import "gonum.org/v1/gonum/stat/combin"
 
-func GeneratePermutations(n, length int, sender chan<- []int) {
-	defer close(sender)
-	generator := combin.NewPermutationGenerator(n, length)
+func GeneratePermutations(n, length int) [][]int {
+	permutations := [][]int{}
+	generator := combin.NewPermutationGenerator(8, 3)
 	for {
 		if !generator.Next() {
 			break
 		}
-		perm := generator.Permutation(nil)
-		sender <- perm
+		permutations = append(permutations, generator.Permutation(nil))
 	}
+	return permutations
 }

@@ -88,18 +88,19 @@ func decode(message string) {
 	message = enigma.PreprocessText(message)
 	rotorModels := enigma.AvailableRotorModels()
 
-	permutationSender := make(chan []int)
+	permutations := cracker.GeneratePermutations(8, 3)
+	fmt.Printf("So far %s\n", time.Since(start))
+
 	scoreSender := make(chan map[string]float64)
 
-	go cracker.GeneratePermutations(8, 3, permutationSender)
-
 	wg := sync.WaitGroup{}
-	for permutation := range permutationSender {
+	wg.Add(len(permutations))
+
+	for _, permutation := range permutations {
 		rotorConfig := make([]string, 0, 3)
 		for _, index := range permutation {
 			rotorConfig = append(rotorConfig, rotorModels[index])
 		}
-		wg.Add(1)
 		go func(config []string, message string) {
 			defer wg.Done()
 			result, err := decodeRotorConfig(config, message)
