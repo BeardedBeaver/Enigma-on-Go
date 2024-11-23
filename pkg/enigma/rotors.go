@@ -16,6 +16,17 @@ var rotorMappings = map[string]string{
 	"VIII": "FKQHTLXOCBJSPDZRAMEWNIUYGV",
 }
 
+var rotorBackMappings = map[string]string{
+	"I":    "UWYGADFPVZBECKMTHXSLRINQOJ",
+	"II":   "AJPCZWRLFBDKOTYUQGENHXMIVS",
+	"III":  "TAGBPCSDQEUFVNZHYIXJWLRKOM",
+	"IV":   "HZWVARTNLGUPXQCEJMBSKDYOIF",
+	"V":    "QCYLXWENFTZOSMVJUDKGIARPHB",
+	"VI":   "SKXQLHCNWARVGMEBJPTYFDZUIO",
+	"VII":  "QMGYVPEDRCWTIANUXFKZOSLHJB",
+	"VIII": "QJINSAYDVKBFRUHMCPLEWZTGXO",
+}
+
 var rotorNotchPositions = map[string][]byte{
 	"I":    {'Q'},
 	"II":   {'E'},
@@ -113,15 +124,9 @@ func NewRotor(model string, position, offset int) (Rotor, error) {
 		return Rotor{}, fmt.Errorf("mapping not found for rotor model %s", model)
 	}
 
-	// forms a back mapping for the back pass
-	var backMapping string
-	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	for _, letter := range alphabet {
-		for j, letterInMapping := range mapping {
-			if letter == letterInMapping {
-				backMapping += string(alphabet[j])
-			}
-		}
+	backMapping, ok := rotorBackMappings[model]
+	if !ok {
+		return Rotor{}, fmt.Errorf("backwards mapping not found for rotor model %s", model)
 	}
 
 	notchPositions, ok := rotorNotchPositions[model]
