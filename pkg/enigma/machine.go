@@ -166,19 +166,19 @@ func NewMachineFromTextConfig(
 	rotorConfig := make([]RotorConfig, 0, len(rotors))
 	for i := 0; i < len(rotors); i++ {
 		rotorSetting := int(positions[i][0])
-		rotorOffset, err := strconv.Atoi(offsets[i])
+		rotorOffset, err := strconv.Atoi(strings.TrimSpace(offsets[i]))
 		if err != nil {
 			fmt.Println(err)
 			return Machine{}, err
 		}
 		rotorConfig = append(
 			rotorConfig,
-			RotorConfig{Model: rotors[i], Position: rotorSetting, Offset: rotorOffset},
+			RotorConfig{Model: strings.TrimSpace(rotors[i]), Position: rotorSetting, Offset: rotorOffset},
 		)
 	}
 	machineConfig := MachineConfig{
 		RotorConfig:       rotorConfig,
-		ReflectorModel:    reflectorModel,
+		ReflectorModel:    strings.TrimSpace(reflectorModel),
 		PlugboardMappings: plugboardMapping,
 	}
 	machine, err := NewMachine(machineConfig)
