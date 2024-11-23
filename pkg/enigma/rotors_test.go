@@ -169,29 +169,6 @@ func TestRotorIIWithOffset(t *testing.T) {
 	}
 }
 
-func TestNormalizeCharacter(t *testing.T) {
-	data := map[int]int{
-		0:   0,
-		5:   5,
-		26:  0,
-		29:  3,
-		-1:  25,
-		-24: 2,
-	}
-
-	for key, value := range data {
-		result := normalizeCharacter(key)
-		if result != value {
-			message := fmt.Sprintf("Normalize character error "+
-				"input %d, "+
-				"expected %d, "+
-				"got %d",
-				key, value, result)
-			t.Error(message)
-		}
-	}
-}
-
 func TestRotor_IsAtNotch(t *testing.T) {
 	model := "I"
 	rotor, err := NewRotor(model, 'A', 0)
