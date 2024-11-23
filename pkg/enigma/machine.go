@@ -82,8 +82,8 @@ func (machine *Machine) passChar(character byte) byte {
 	character = machine.plugbrd.PassCharacter(character)
 
 	// forward rotors pass
-	for _, rotor := range machine.rot {
-		character = rotor.PassForward(character)
+	for i := range machine.rot {
+		character = machine.rot[i].PassForward(character)
 	}
 
 	// reflector
