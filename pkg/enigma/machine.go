@@ -101,12 +101,13 @@ func (machine *Machine) passChar(character byte) byte {
 }
 
 func (machine *Machine) PassString(message string) string {
-	var result string
+	var b strings.Builder
+	b.Grow(len(message))
 	for _, character := range message {
 		encodedCharacter := machine.passChar(byte(character))
-		result += string(encodedCharacter)
+		b.WriteByte(encodedCharacter)
 	}
-	return result
+	return b.String()
 }
 
 // NewMachine creates a new Enigma machine.
