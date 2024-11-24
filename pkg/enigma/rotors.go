@@ -61,16 +61,12 @@ type Rotor struct {
 
 func (rotor *Rotor) passCharacter(mapping string, character byte) byte {
 	code := int(character - 'A')
-	code += rotor.position
-	code -= rotor.offset
-	code = normalizeCharacter(code)
+	code = (code + rotor.position - rotor.offset + 26) % 26
 
 	result := int(mapping[code] - 'A')
-	result -= rotor.position
-	result += rotor.offset
-	result = normalizeCharacter(result) + 'A'
+	result = (result - rotor.position + rotor.offset + 26) % 26
 
-	return byte(result)
+	return byte(result + 'A')
 }
 
 // PassForward function passes a signal through the rotor
@@ -101,13 +97,6 @@ func (rotor *Rotor) IsAtNotch() bool {
 		}
 	}
 	return false
-}
-
-func normalizeCharacter(character int) int {
-	for character < 0 {
-		character += 26
-	}
-	return character % 26
 }
 
 // NewRotor function creates a new rotor with a given position (expressed as a capital letter)

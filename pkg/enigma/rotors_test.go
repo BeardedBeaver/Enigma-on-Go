@@ -169,29 +169,6 @@ func TestRotorIIWithOffset(t *testing.T) {
 	}
 }
 
-func TestNormalizeCharacter(t *testing.T) {
-	data := map[int]int{
-		0:   0,
-		5:   5,
-		26:  0,
-		29:  3,
-		-1:  25,
-		-24: 2,
-	}
-
-	for key, value := range data {
-		result := normalizeCharacter(key)
-		if result != value {
-			message := fmt.Sprintf("Normalize character error "+
-				"input %d, "+
-				"expected %d, "+
-				"got %d",
-				key, value, result)
-			t.Error(message)
-		}
-	}
-}
-
 func TestRotor_IsAtNotch(t *testing.T) {
 	model := "I"
 	rotor, err := NewRotor(model, 'A', 0)
@@ -227,5 +204,54 @@ func TestRotor_IsAtNotchWithOffset(t *testing.T) {
 
 	if rotor.IsAtNotch() == false {
 		t.Error("Rotor", model, "says it's not at notch while in fact it should be")
+	}
+}
+
+func normalizeCharacter(character int) int {
+	for character < 0 {
+		character += 26
+	}
+	return character % 26
+}
+
+func passCharacterOld(rotor *Rotor, mapping string, character byte) byte {
+	code := int(character - 'A')
+	code += rotor.position
+	code -= rotor.offset
+	code = normalizeCharacter(code)
+
+	result := int(mapping[code] - 'A')
+	result -= rotor.position
+	result += rotor.offset
+	result = normalizeCharacter(result) + 'A'
+
+	return byte(result)
+}
+
+func BenchmarkPassCharacterOld(b *testing.B) {
+	rotor, err := NewRotor("III", 'F', 5)
+	if err != nil {
+		panic(err)
+	}
+	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, c := range alphabet {
+			passCharacterOld(&rotor, rotor.mapping, byte(c))
+		}
+	}
+}
+
+func BenchmarkPassCharacter(b *testing.B) {
+	rotor, err := NewRotor("III", 'F', 5)
+	if err != nil {
+		panic(err)
+	}
+	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, c := range alphabet {
+			rotor.passCharacter(rotor.mapping, byte(c))
+		}
 	}
 }
