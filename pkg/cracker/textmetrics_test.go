@@ -32,3 +32,59 @@ func TestIOC(t *testing.T) {
 		t.Error(message)
 	}
 }
+
+func iocOriginal(text string) float64 {
+	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var letterCount = make(map[byte]int)
+	for _, char := range text {
+		letterCount[byte(char)] += 1
+	}
+	var ioc float64
+	textLength := float64(len(text))
+	for _, char := range alphabet {
+		ioc += float64(letterCount[byte(char)]) / textLength *
+			(float64(letterCount[byte(char)]) - 1.0) / (textLength - 1.0)
+	}
+	return ioc
+}
+
+func iocNoConversion(text string) float64 {
+	var letterCount = make(map[rune]int)
+	for _, char := range text {
+		letterCount[char] += 1
+	}
+	var ioc float64
+	textLength := float64(len(text))
+	for _, char := range alphabet {
+		ioc += float64(letterCount[char]) / textLength *
+			(float64(letterCount[char]) - 1.0) / (textLength - 1.0)
+	}
+	return ioc
+}
+
+func BenchmarkIocOriginal(b *testing.B) {
+	longText := "THISISAMUCHLONGERTEXTDESIGNEDTOSTRESSTHETIOCFUNCTIONITHASENOUGHCONTENTTOEVALUATEPERFORMANCEUNDERLARGERINPUTSIZESTHISSHOULDDIVEAGOODIDEAOFHOWTHEFUNCTIONSCALESWITHLARGERSTRINGSTHETEXTSIZEINCREASES"
+
+	b.ResetTimer() // Reset timer to exclude setup time
+	for i := 0; i < b.N; i++ {
+		iocOriginal(longText)
+	}
+}
+
+func BenchmarkIocNoConversion(b *testing.B) {
+	longText := "THISISAMUCHLONGERTEXTDESIGNEDTOSTRESSTHETIOCFUNCTIONITHASENOUGHCONTENTTOEVALUATEPERFORMANCEUNDERLARGERINPUTSIZESTHISSHOULDDIVEAGOODIDEAOFHOWTHEFUNCTIONSCALESWITHLARGERSTRINGSTHETEXTSIZEINCREASES"
+
+	b.ResetTimer() // Reset timer to exclude setup time
+	for i := 0; i < b.N; i++ {
+		iocNoConversion(longText)
+	}
+}
+
+func BenchmarkIoc(b *testing.B) {
+	longText := "THISISAMUCHLONGERTEXTDESIGNEDTOSTRESSTHETIOCFUNCTIONITHASENOUGHCONTENTTOEVALUATEPERFORMANCEUNDERLARGERINPUTSIZESTHISSHOULDDIVEAGOODIDEAOFHOWTHEFUNCTIONSCALESWITHLARGERSTRINGSTHETEXTSIZEINCREASES"
+
+	b.ResetTimer() // Reset timer to exclude setup time
+	for i := 0; i < b.N; i++ {
+		IOC(longText)
+	}
+}
